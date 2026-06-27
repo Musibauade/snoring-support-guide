@@ -593,6 +593,69 @@
   /* scroll reveal */
   .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.55s ease, transform 0.55s ease; }
   .reveal.visible { opacity: 1; transform: none; }
+
+  /* THANK YOU POPUP */
+  .popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .popup-overlay.active { display: flex; }
+  .popup-box {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 40px 32px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    border-top: 6px solid var(--gold);
+  }
+  .popup-close {
+    position: absolute;
+    top: 14px; right: 18px;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--gray);
+    background: none;
+    border: none;
+  }
+  .popup-emoji { font-size: 52px; margin-bottom: 14px; }
+  .popup-title { font-size: 24px; font-weight: 800; color: var(--navy); margin-bottom: 10px; }
+  .popup-sub { font-size: 15px; color: var(--gray); line-height: 1.6; margin-bottom: 24px; }
+  .popup-btn {
+    display: block;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 17px;
+    font-weight: 700;
+    padding: 16px 24px;
+    border-radius: 10px;
+    text-decoration: none;
+    margin-bottom: 14px;
+    transition: background 0.2s;
+  }
+  .popup-btn:hover { background: #e8970f; }
+  .popup-btn2 {
+    display: block;
+    background: var(--teal);
+    color: var(--white);
+    font-size: 15px;
+    font-weight: 600;
+    padding: 13px 24px;
+    border-radius: 10px;
+    text-decoration: none;
+    margin-bottom: 10px;
+    transition: background 0.2s;
+  }
+  .popup-btn2:hover { background: #147990; }
+  .popup-note { font-size: 12px; color: var(--gray); }
+
 </style>
 </head>
 <body>
@@ -1036,16 +1099,28 @@
     const email = form.querySelector('input[type="email"]').value;
     btn.textContent = 'Sending...';
     btn.disabled = true;
-    // Open Google Form with email prefilled
-    const googleFormUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSd' + 
-      'rQ8wUQRJEsfe9Lys2aA/viewform?usp=pp_url&entry.emailAddress=' + 
-      encodeURIComponent(email);
-    window.open('https://forms.gle/8wUQRJEsfe9Lys2aA', '_blank');
+    // Submit to Google Form silently
+    const formData = new FormData();
+    formData.append('entry.1045781291', email);
+    fetch('https://docs.google.com/forms/d/e/1FAIpQLSe8wUQRJEsfe9Lys2aA/formResponse', {
+      method: 'POST', mode: 'no-cors', body: formData
+    }).catch(() => {});
+    // Show thank you popup immediately
     setTimeout(() => {
       form.style.display = 'none';
       document.getElementById(successId).style.display = 'block';
-    }, 800);
+      document.getElementById('thankyou-popup').classList.add('active');
+    }, 600);
   }
+
+  function closePopup() {
+    document.getElementById('thankyou-popup').classList.remove('active');
+  }
+
+  // Close popup when clicking outside
+  document.getElementById('thankyou-popup').addEventListener('click', function(e) {
+    if (e.target === this) closePopup();
+  });
 
   function toggleFaq(el) {
     const item = el.closest('.faq-item');
@@ -1060,5 +1135,19 @@
   }, { threshold: 0.1 });
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 </script>
+
+<!-- THANK YOU POPUP -->
+<div class="popup-overlay" id="thankyou-popup">
+  <div class="popup-box">
+    <button class="popup-close" onclick="closePopup()">✕</button>
+    <div class="popup-emoji">🎉</div>
+    <div class="popup-title">Your Free Guide is Ready!</div>
+    <div class="popup-sub">Thank you for signing up! Click the button below to download your <strong>Stop Snoring Tonight</strong> guide — all 7 steps inside.</div>
+    <a href="https://drive.google.com/file/d/1mGcxF3Van8Gm6eXJXRH3aqNRl24PTDBt/view" target="_blank" class="popup-btn">📥 Download Your Free Guide Now</a>
+    <a href="https://thekingspen1nfluential.substack.com" target="_blank" class="popup-btn2">📧 Subscribe for Weekly Sleep Tips</a>
+    <p class="popup-note">Check your email for your copy too. Share with anyone who snores! 😴</p>
+  </div>
+</div>
+
 </body>
 </html>
