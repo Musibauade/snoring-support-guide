@@ -606,7 +606,7 @@
 <!-- NAV -->
 <nav>
   <div class="nav-logo">Stop<span>Snoring</span>.Guide</div>
-  <a href="https://thekingspen1nfluential.substack.com/?utm_source=landing&showWelcomeOnShare=false" target="_blank" class="nav-cta">Get Free Guide →</a>
+  <a href="#hero-form" target="_blank" class="nav-cta">Get Free Guide →</a>
 </nav>
 
 <!-- HERO -->
@@ -623,7 +623,7 @@
       <div class="hero-check">Completely free</div>
       <div class="hero-check">For all ages &amp; snoring types</div>
     </div>
-    <form class="hero-form" id="hero-form" action="https://thekingspen1nfluential.substack.com/api/v1/free" method="post" target="_blank">
+    <form class="hero-form" id="hero-form" onsubmit="handleSubmit(event,'hero-success')">
       <input type="email" name="email" placeholder="Enter your email address" required autocomplete="email"><input type="hidden" name="first_url" value="https://musibauade.github.io/snoring-support-guide/"><input type="hidden" name="first_referrer" value=""><input type="hidden" name="current_url" value="https://musibauade.github.io/snoring-support-guide/"><input type="hidden" name="current_referrer" value=""><input type="hidden" name="referral_code" value=""><input type="hidden" name="source" value="subscribe_page">
       <button type="submit" class="btn-primary pulse">Send Me the Guide →</button>
     </form>
@@ -1008,7 +1008,7 @@
   <div class="final-cta-inner">
     <h2>You don't have to snore<br><em>another night.</em></h2>
     <p>Join 50,000+ people worldwide who downloaded this guide and woke up to a quieter, more restful life. It takes 30 seconds to get your copy.</p>
-    <form class="final-form" action="https://thekingspen1nfluential.substack.com/api/v1/free" method="post" target="_blank">
+    <form class="final-form" onsubmit="handleSubmit(event,'final-success')">
       <input type="email" name="email" placeholder="Your email address" required><input type="hidden" name="first_url" value="https://musibauade.github.io/snoring-support-guide/"><input type="hidden" name="source" value="subscribe_page">
       <button type="submit" class="btn-primary">Get the Free Guide →</button>
     </form>
@@ -1025,20 +1025,31 @@
 
 <!-- STICKY MOBILE CTA -->
 <div class="sticky-cta">
-  <a href="https://thekingspen1nfluential.substack.com/?utm_source=landing&showWelcomeOnShare=false" target="_blank">Get the Free Guide — It's 100% Free →</a>
+  <a href="#hero-form" target="_blank">Get the Free Guide — It's 100% Free →</a>
 </div>
 
 <script>
-  function handleSubmit(e, successId) {
+  async function handleSubmit(e, successId) {
     e.preventDefault();
     const form = e.target;
     const btn = form.querySelector('button');
-    btn.textContent = 'Sending...';
+    const email = form.querySelector('input[type="email"]').value;
+    btn.textContent = 'Subscribing...';
     btn.disabled = true;
-    setTimeout(() => {
+    try {
+      const res = await fetch('https://thekingspen1nfluential.substack.com/api/v1/free', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ email, first_url: window.location.href, source: 'subscribe_page' })
+      });
       form.style.display = 'none';
       document.getElementById(successId).style.display = 'block';
-    }, 900);
+    } catch(err) {
+      // Fallback - open Substack subscribe page with email prefilled
+      window.open('https://thekingspen1nfluential.substack.com/subscribe?email=' + encodeURIComponent(email), '_blank');
+      form.style.display = 'none';
+      document.getElementById(successId).style.display = 'block';
+    }
   }
 
   function toggleFaq(el) {
